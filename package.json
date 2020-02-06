@@ -1,0 +1,14 @@
+{
+  "name": "atm-machine-10000",
+  "version": "1.0.0",
+  "description": "ATM machine with node",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "say": "^0.16.0"
+  }
+}
