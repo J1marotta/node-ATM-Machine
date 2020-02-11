@@ -8,6 +8,27 @@ const wait = ms => {
 
 const sp = speech(0)
 
+const sendHelp = () => {
+  console.clear()
+  console.log(`
+                                ,d   10,0000
+                               88
+                  ,adPPYYba,  MM88MMM  88,dPYba,,adPYba,
+                          Y8   88      88P     88      8a
+                  ,adPPPPP88   88      88      88      88
+                  88,    ,88   88,     88      88      88
+                    8bbdP Y8   Y88     88      88      88
+                      By James Marotta
+ 
+                      `)
+  console.log("                 1    for DISPLAY BALANCE")
+  console.log("                 2    for DEPOSIT")
+  console.log("                 3    for WITHDRAWAL")
+  console.log("                 4    to CHANGE PIN")
+  console.log("                 H    for HELP")
+  console.log("                 Q    to QUIT")
+}
+
 const intro = async () => {
   S(sp("intro"))
 
@@ -20,6 +41,7 @@ const intro = async () => {
   console.log("                                                       ")
   console.log("           I see you are a new bank customer           ")
   console.log("               Please enter your details               ")
+  sendHelp()
 }
 
 const pinControl = async () => {
@@ -33,17 +55,56 @@ const pinControl = async () => {
   return pin
 }
 
-const choice = async (bal, chances) => {
+const pinCheck = (chances, pin) => {
+  do {
+    S("enter pin")
+    const pinGuess = prompt("Enter PIN")
+    if (pinGuess !== pin) {
+      S(" Incorrect PIN")
+      chances--
+    }
+    if (pinGuess === pin) {
+      S("Correct")
+      break
+    }
+
+    if (chances === 0) {
+      setTimeout(
+        () => console.log(`       Three Strikes, you\'re OUT!      `),
+
+        // police()
+        1000
+      )
+      return false
+    }
+  } while (chances > 0)
+  return true
+}
+
+const balance = (bal, chances, pin) => {
+  S("Balance")
+  if (pinCheck(chances, pin)) {
+    S("pinaccept")
+    S(speech(bal)("bal"))
+
+    console.clear()
+    console.log(`           Your Balance is `)
+    console.log(`           $ ${bal} Dollaroos `)
+  }
+}
+
+const choice = async (bal, chances, pin) => {
   await wait(1200)
+
   S(sp("help"))
 
-  let choice
+  let choice = prompt(" ")
 
   while (true) {
     switch (choice) {
       case "1":
         S(sp("Balance"))
-        // balance(bal)
+        balance(bal, chances, pin)
         break
       case "2":
         S(sp("deposit"))
@@ -79,7 +140,7 @@ const main = async () => {
   const pin = await pinControl()
   console.log("Keep your Pin Safe!")
 
-  await choice(bal, chances)
+  await choice(bal, chances, pin)
 }
 
 main()
