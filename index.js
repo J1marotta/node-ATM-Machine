@@ -1,5 +1,4 @@
-
-const fs = require('fs')
+const fs = require("fs")
 const say = require("say")
 const S = f => say.speak(f, null, 1.55)
 const { speech } = require("./speech")
@@ -10,31 +9,32 @@ const wait = ms => {
 
 const sp = speech(0)
 
-const police = async (gs) => {
-  S(sp('police'))
+const police = async gs => {
+  S(sp("police"))
   // 5 times do (from ruby code)
-  Array(5).fill(1).map( async () =>  {
-    console.log("                    WARNING WARNING WARNING")
-    console.log("              : ! The police are on their way ! :")
-    console.log("                    WARNING WARNING WARNING")
-    await wait(1000)
-  })
+  Array(5)
+    .fill(1)
+    .map(async () => {
+      console.log("                    WARNING WARNING WARNING")
+      console.log("              : ! The police are on their way ! :")
+      console.log("                    WARNING WARNING WARNING")
+      await wait(1000)
+    })
   // pause for dramatic effect
   await wait(2000)
 
-  fs.readFile('police.txt', 'utf8', (err, data) => {
-    if(err) throw err
-
-    console.log(data)
-    
+  await fs.readFile("police.txt", "utf8", (err, data) => {
+    if (err) {
+      console.error(err)
+      throw err
+    }
+    console.log(JSON.stringify(data))
   })
-  gs = 'stop'
+  gs = "stop"
   return gs
-
 }
 
-
-const sendHelp = () => {
+const sendHelp = async () => {
   console.clear()
   console.log(`
                                 ,d   10,0000
@@ -98,7 +98,7 @@ const pinCheck = async (chances, pin, gs) => {
       setTimeout(
         () => console.log(`       Three Strikes, you\'re OUT!      `),
 
-       await police(gs),
+        await police(gs),
         1000
       )
       return false
@@ -124,17 +124,16 @@ const balance = async (bal, chances, pin, gs) => {
 const choice = async (bal, chances, pin, gs) => {
   await wait(1200)
 
+  await sendHelp()
   S(sp("help"))
 
   let choice = prompt("  ")
 
-
-
-  while (gs === 'go') {
+  while (gs === "go") {
     switch (choice) {
       case "1":
         S(sp("Balance"))
-         await balance(bal, chances, pin, gs)
+        await balance(bal, chances, pin, gs)
         break
       case "2":
         S(sp("deposit"))
@@ -163,7 +162,7 @@ const choice = async (bal, chances, pin, gs) => {
 const main = async () => {
   let bal = 100
   let chances = 3
-  let gs = 'go'
+  let gs = "go"
   // await intro()
   const name = prompt(`Name(then push enter):  `)
   S(`Welcome ${name}, now lets set up a PIN:  `)
