@@ -242,11 +242,11 @@ const mainMenu = async (bal, chances, pin, gs) => {
         await sendHelp()
         choice = prompt('Choice: ')
         break
-      case "Q":
+      case "Q": case 'q':
         await quit()
         choice = prompt('Choice: ')
         break
-      case "H":
+      case "H": case 'h':
         S(sp("help"))
         choice = prompt('Choice: ')
         break;
