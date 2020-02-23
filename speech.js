@@ -17,7 +17,7 @@ const speech = y => x => {
     case "deposit":
       return `Make a Deposit`
 
-    case "Withdraw":
+    case "withdraw":
       return `Make a Withdrawal`
 
     case "how much w":

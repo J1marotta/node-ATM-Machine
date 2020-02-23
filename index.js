@@ -9,7 +9,7 @@ const wait = ms => {
 
 const sp = speech(0)
 
-const police = async gs => {
+const police = async () => {
   S(sp("police"))
   // 5 times do (from ruby code)
   Array(5)
@@ -27,8 +27,7 @@ const police = async gs => {
 
   console.log(police)
 
-  gs = "stop"
-  return gs
+  process.exit()
 }
 
 const sendHelp = async () => {
@@ -64,7 +63,7 @@ const intro = async () => {
   console.log("                                                       ")
   console.log("           I see you are a new bank customer           ")
   console.log("               Please enter your details               ")
-  sendHelp()
+
 }
 
 const pinControl = async () => {
@@ -74,11 +73,11 @@ const pinControl = async () => {
     S("four ")
   } while (pin.length !== 4)
   S("pinaccept, keep your Pin Safe!")
-  await wait(800)
+  await wait(1500)
   return pin
 }
 
-const pinCheck = async (chances, pin, gs) => {
+const pinCheck = async (chances, pin) => {
   do {
     S("enter pin")
     const pinGuess = prompt("Enter PIN: ")
@@ -88,88 +87,191 @@ const pinCheck = async (chances, pin, gs) => {
     }
     if (pinGuess === pin) {
       S("Correct")
-      break
+      return true
     }
 
     if (chances === 0) {
       setTimeout(
         () => console.log(`       Three Strikes, you\'re OUT!      `),
 
-        await police(gs),
+        await police(),
         1000
       )
-      process.exit()
     }
   } while (chances > 0)
-  return true
+  return false
 }
 
-const balance = async (bal, chances, pin, gs) => {
+const displaybal = bal => {
+  console.clear()
+  console.log(`           Your Balance is `)
+  console.log(`           $ ${bal} Dollaroos `)
+}
+
+const balance = async (bal, chances, pin) => {
   S("Balance")
-  if (await pinCheck(chances, pin, gs)) {
-    S("pinaccept")
+  if (await pinCheck(chances, pin)) {
     await wait(500)
+    S("pinaccept")
+    await wait(2000)
     S(speech(bal)("bal"))
-
-    console.clear()
-    console.log(`           Your Balance is `)
-    console.log(`           $ ${bal} Dollaroos `)
-    await wait(1000)
+    displaybal(bal)
+    await wait(2000)
   }
-  return gs
+}
+
+const quit = async () => {
+  console.clear()
+  S(sp('quit'))
+  console.log()
+  console.log( "      You can't quit yet we are buying stuff with your card in India")
+  console.log( "                       hahaha, joking... ")
+  console.log( "                             ... ")
+  console.log( "                      Really Quit? [y/n]")
+  S("Really?")
+  const exit = prompt('y/n ? ')
+
+  if(exit === 'y'){
+    console.log()
+    console.log( "              Thanks for choosing ATM Machine 10000")
+    S(sp("thankyou"))
+    console.log()
+    process.exit()
+
+  } else if (exit === 'n') {
+      console.log()
+      await wait(500)
+      console.log( "        Great choice, we are just hacking your facebook now")
+      S(sp("staying"))
+      console.log()
+      await wait(500)
+      await sendHelp()
+      return null
+  }
+}
+
+const withdrawal = async (bal, chances, pin) => {
+  console.clear()
+  S(sp('withdraw'))
+  console.log("       Make a withdrawal\n")
+
+  if (await pinCheck(chances, pin)) {
+    await wait(500)
+
+
+  S(sp('how much w'))
+   const amount = prompt("How much?: ")
+   S(sp('confirm withdraw'))
+   bal -= amount
+   S(speech(bal)('Rbal'))
+   await wait(1000)
+   displaybal(bal)
+   await wait(1000)
+  }
+  await wait(200)
+  console.log('....dispensing...')
+  console.clear()
+  await wait(500)
+  const dollars = await fs.readFileSync('dollaroos.txt', 'utf8')
+  console.log(dollars)
+
+  process.exit()
 
 }
 
-const choice = async (bal, chances, pin, gs) => {
+const changePin = async ( pin, chances ) => {
+  if( await pinCheck(chances, pin)) {
+    await wait(500)
+    const newPin = await pinControl()
+    return newPin
+  }
+}
+
+
+const deposit = async (bal,chances,pin) => {
+  console.clear()
+  S(sp('deposit'))
+  console.log("       Make a deposit\n")
+
+  if (await pinCheck(chances, pin)) {
+   await wait(500)
+   S(sp('how much d'))
+   const amount = Number(prompt("How much?: "))
+   
+   S(sp('confirm deposit'))
+   bal += amount
+   S(speech(bal)('Rbal'))
+   await wait(1000)
+   displaybal(bal)
+   await wait(1000)
+   return bal
+  }
+  
+}
+
+
+const mainMenu = async (bal, chances, pin, gs) => {
   await wait(1200)
-
+  console.log('DEBUG: pin', pin)
   await sendHelp()
-  S(sp("help"))
-
-  let choice = prompt("  ")
+  
+  let choice = prompt("Choice:  ")
 
   while (gs === "go") {
     switch (choice) {
       case "1":
         S(sp("Balance"))
-        await balance(bal, chances, pin, gs)
+        await balance(bal, chances, pin)
+        await sendHelp()
+        choice = prompt('Choice: ')
         break
       case "2":
         S(sp("deposit"))
-        // deposit(bal)
+        bal = await deposit(bal, chances, pin)
+        await sendHelp()
+        choice = prompt('Choice: ')
         break
       case "3":
         S(sp("withdraw"))
-        // withdrawal(bal)
+        await withdrawal(bal, chances, pin )
+        choice = prompt('Choice: ')
         break
       case "4":
         S(sp("change pin"))
-        // change_pin(chances)
+        pin = await changePin(pin, chances)
+        await sendHelp()
+        choice = prompt('Choice: ')
         break
-      case "q":
-        // quit()
+      case "Q":
+        await quit()
+        choice = prompt('Choice: ')
         break
-      case "h":
+      case "H":
         S(sp("help"))
+        choice = prompt('Choice: ')
+        break;
       default:
-        // send_help()
-        break
+        choice = prompt('Choice: ')
+        break;
     }
   }
 }
+
+
+
 
 const main = async () => {
   let bal = 100
   let chances = 3
   let gs = "go"
-  // await intro()
-  const name = prompt(`Name(then push enter):  `)
+  await intro()
+  const name = prompt(`Name (then push enter):  `)
   S(`Welcome ${name}, now lets set up a PIN:  `)
 
   const pin = await pinControl()
   console.log("Keep your Pin Safe!")
 
-  await choice(bal, chances, pin, gs)
+  await mainMenu(bal, chances, pin, gs)
 }
 
 main()
