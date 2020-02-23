@@ -23,13 +23,10 @@ const police = async gs => {
   // pause for dramatic effect
   await wait(2000)
 
-  await fs.readFile("police.txt", "utf8", (err, data) => {
-    if (err) {
-      console.error(err)
-      throw err
-    }
-    console.log(JSON.stringify(data))
-  })
+  const police = await fs.readFileSync("police.txt", "utf8")
+
+  console.log(police)
+
   gs = "stop"
   return gs
 }
@@ -101,7 +98,7 @@ const pinCheck = async (chances, pin, gs) => {
         await police(gs),
         1000
       )
-      return false
+      process.exit()
     }
   } while (chances > 0)
   return true
@@ -119,6 +116,8 @@ const balance = async (bal, chances, pin, gs) => {
     console.log(`           $ ${bal} Dollaroos `)
     await wait(1000)
   }
+  return gs
+
 }
 
 const choice = async (bal, chances, pin, gs) => {
